@@ -2,6 +2,8 @@ import React, {useState, useEffect} from 'react';
 import { Button, SafeAreaView, StyleSheet, Text, TextInput, View, Dimensions} from 'react-native';
 import {LineChart} from "react-native-chart-kit";
 
+import colors from './config';
+
 const App = () => {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -59,9 +61,9 @@ const App = () => {
           yAxisSuffix="k"
           yAxisInterval={1} // optional, defaults to 1
           chartConfig={{
-            backgroundColor: "black",
-            backgroundGradientFrom: "black",
-            backgroundGradientTo: "black",
+            backgroundColor: colors.palette2,
+            backgroundGradientFrom: colors.palette2,
+            backgroundGradientTo: colors.palette2,
             decimalPlaces: 2, // optional, defaults to 2dp
             color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
             labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
@@ -71,7 +73,7 @@ const App = () => {
             propsForDots: {
               r: "6",
               strokeWidth: "2",
-              stroke: "#ffa726"
+              stroke: colors.palette4
             }
           }}
           bezier
@@ -81,7 +83,7 @@ const App = () => {
           }}
         />
       </View>
-      <Text>Total Income: {total}</Text>
+      <Text style={styles.text}>Total Income: {total}</Text>
       <TextInput
         style={styles.input}
         value={description}
@@ -96,10 +98,10 @@ const App = () => {
         onChangeText={text => setAmount(text)}
       />
       <Button disabled={!amount && !description} onPress={addGig} title='add Gig'/>
-      <Text>Gig History</Text>
+      <Text style={styles.header}>Gig History</Text>
       {gigs.map(gig =>
         <View>
-          <Text>{gig.description}: {gig.amount}</Text>
+          <Text style={styles.text}>{gig.description}: {gig.amount}</Text>
         </View>
       )}
     </SafeAreaView>
@@ -110,22 +112,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "flex-start",
-    backgroundColor: "pink",
-    marginTop: 20
+    backgroundColor: colors.palette4,
+    marginTop: 20,
+    color: colors.palette1
   },
   titleText: {
     fontSize: 30,
     fontWeight: "bold",
     paddingTop: 20,
-    alignSelf: "center"
+    alignSelf: "center",
+    color: colors.palette1
   },
   input: {
     margin: 20,
     padding: 20,
     height: 60,
-    borderColor: 'black',
+    borderColor: colors.palette1,
     borderWidth: 1,
-    backgroundColor: "white"
+    backgroundColor: colors.palette5
+  },
+  text: {
+    color: colors.palette1
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: colors.palette1
   }
 });
 
