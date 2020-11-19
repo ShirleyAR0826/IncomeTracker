@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { Button, SafeAreaView, StyleSheet, Text, TextInput, View, Dimensions} from 'react-native';
 import {LineChart} from "react-native-chart-kit";
+import moment from 'moment';
 
 import colors from './config';
 
@@ -8,16 +9,53 @@ const App = () => {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [total, setTotal] = useState(0);
+  const [data, setData] = useState([
+    {date: moment().format('LL'), amount: 2000},
+    {date: moment().subtract(1, 'days').format('LL'), amount: 2500},
+    {date: moment().subtract(1, 'days').format('LL'), amount: 2500},
+    {date: moment().subtract(1, 'days').format('LL'), amount: 2500},
+    {date: moment().subtract(2, 'days').format('LL'), amount: 3500},
+    {date: moment().subtract(3, 'days').format('LL'), amount: 4500},
+    {date: moment().subtract(4, 'days').format('LL'), amount: 5500},
+  ]);
+  const [transformedData, setTransformedData] = useState([]);
+  const [dates, setDates] = useState([]);
+  const [amounts, setAmounts] = useState([]);
+
+  const groupBy = (array, key) => 
+    array.reduce((rv, x) => {
+      (rv[x[key]] = rv[x[key]] || []).push(x);
+      return rv;
+    }, {});
+
   const [gigs, setGigs] = useState([
     {
       description: 'Freelance Job with Qazi',
-      amount: 499.99
+      amount: 499.99,
+      timestamp: new Date(),
     }
   ]);
+
+  const getDates = (dataset) => dataset.map(pair => pair.date);
+  const getAmounts = (dataset) => dataset.map(pair => pair.amount);
+  const transformData = (groupedData) => {
+    const transformedArray = [];
+    Object.entries(groupedData).forEach(entry => {
+      const total = entry[1].reduce((total, pair) => total + pair.amount, 0);
+      transformedArray.push({date: entry[0], amount: total});
+    });
+    return transformedArray;
+  }
 
   useEffect(() => {
     setTotal(gigs.reduce((total, gig) => total + Number(gig.amount), 0));
   }, [gigs]);
+
+  useEffect(() => {
+    setTransformedData(transformData(groupBy(data, "date")));
+    setDates(getDates(transformedData));
+    setAmounts(getAmounts(transformedData));
+  }, [data]);
 
   const addGig = () => {
     setGigs (
@@ -28,6 +66,8 @@ const App = () => {
     setDescription('');
     setAmount('');
   }
+
+  console.log("App Rendered");
 
   return (
     <SafeAreaView style={styles.container}>
@@ -41,17 +81,10 @@ const App = () => {
         <Text>Bezier Line Chart</Text>
         <LineChart
           data={{
-            labels: ["January", "February", "March", "April", "May", "June"],
+            labels: dates,
             datasets: [
               {
-                data: [
-                  Math.random() * 100,
-                  Math.random() * 100,
-                  Math.random() * 100,
-                  Math.random() * 100,
-                  Math.random() * 100,
-                  Math.random() * 100
-                ]
+                data: amounts,
               }
             ]
           }}
@@ -64,7 +97,7 @@ const App = () => {
             backgroundColor: colors.palette2,
             backgroundGradientFrom: colors.palette2,
             backgroundGradientTo: colors.palette2,
-            decimalPlaces: 2, // optional, defaults to 2dp
+            decimalPlaces: null, // optional, defaults to 2dp
             color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
             labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
             style: {
@@ -83,7 +116,7 @@ const App = () => {
           }}
         />
       </View>
-      <Text style={styles.text}>Total Income: {total}</Text>
+      <Text style={styles.header}>Total Income: ${total}</Text>
       <TextInput
         style={styles.input}
         value={description}
@@ -98,7 +131,7 @@ const App = () => {
         onChangeText={text => setAmount(text)}
       />
       <Button disabled={!amount && !description} onPress={addGig} title='add Gig'/>
-      <Text style={styles.header}>Gig History</Text>
+      <Text style={styles.header}>Your Gig History</Text>
       {gigs.map(gig =>
         <View>
           <Text style={styles.text}>{gig.description}: {gig.amount}</Text>
@@ -124,9 +157,9 @@ const styles = StyleSheet.create({
     color: colors.palette1
   },
   input: {
-    margin: 20,
-    padding: 20,
-    height: 60,
+    margin: 15,
+    padding: 15,
+    height: 45,
     borderColor: colors.palette1,
     borderWidth: 1,
     backgroundColor: colors.palette5
@@ -137,7 +170,9 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 20,
     fontWeight: "600",
-    color: colors.palette1
+    color: colors.palette1,
+    padding: 5,
+    alignSelf: "center"
   }
 });
 
